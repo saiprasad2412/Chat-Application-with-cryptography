@@ -15,6 +15,8 @@ const CLIENT_URL = process.env.CLIENT_URL;
 const publicDir= path.join(process.cwd(),"public"); //cwd--> current working directory
 
 //middlewares
+//it is imp not to parse webhook data it should be in raw format
+app.use("/api/webhooks/clerk",express.raw({type:"application/json"}),clerkWebhook)
 app.use(express.json());
 app.use(cors({origin:CLIENT_URL, credentials:true})); //to enable diff port data access
 app.use(clerkMiddleware());
