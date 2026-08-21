@@ -1,5 +1,6 @@
 import User from "../models/user.model.js";
 import Message from "../models/message.model.js"
+import { getReceiverSocketId } from "../lib/socket.js";
 export async function getUsersForSidebar(req,res){
     try {
         const loggedInUserId=req.user._id;
@@ -94,11 +95,11 @@ export async function sendMessage(req,res){
 
     await newMessage.save();
 
-    // const receiverSocketId = getReceiverSocketId(receiverId);
-    // // only send the message in realtime if user is online
-    // if (receiverSocketId) {
-    //   io.to(receiverSocketId).emit("newMessage", newMessage);
-    // }
+    const receiverSocketId = getReceiverSocketId(receiverId);
+    // only send the message in realtime if user is online
+    if (receiverSocketId) {
+      io.to(receiverSocketId).emit("newMessage", newMessage);
+    }
 
     res.status(201).json(newMessage);
   } catch (error) {
