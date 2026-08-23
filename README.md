@@ -151,3 +151,7 @@ chat-application/
 ├── Dockerfile
 ├── package.json
 └── README.md
+
+
+<img width="1908" height="959" alt="image" src="https://github.com/user-attachments/assets/f885ed43-4b17-4e91-8b82-a89edc93c770" />
+
