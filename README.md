@@ -86,6 +86,8 @@ The chat sidebar automatically adapts to smaller screens.
 - Render
 
 ---
+<img width="1908" height="959" alt="image" src="https://github.com/user-attachments/assets/15d55172-0440-49b6-9134-9c69f63f3374" />
+
 
 # 📂 Project Structure
 
@@ -152,6 +154,4 @@ chat-application/
 ├── package.json
 └── README.md
 
-
-<img width="1908" height="959" alt="image" src="https://github.com/user-attachments/assets/f885ed43-4b17-4e91-8b82-a89edc93c770" />
 
