@@ -1,6 +1,7 @@
 import User from "../models/user.model.js";
 import Message from "../models/message.model.js"
 import { io, getReceiverSocketId } from "../lib/socket.js";
+import { uploadChatMedia } from "../lib/imagekit.js";
 export async function getUsersForSidebar(req,res){
     try {
         const loggedInUserId=req.user._id;
@@ -211,41 +212,96 @@ export async function getMessages(req, res) {
 
 // }
 
+// export async function sendMessage(req, res) {
+//   try {
+//     const { text } = req.body;
+//     const { id: receiverId } = req.params;
+//     const senderId = req.user._id;
+
+//     let imageUrl;
+//     let videoUrl;
+
+//     if (req.file) {
+//       if (!hasImageKitConfig()) {
+//         return res.status(500).json({
+//           message: "Media upload is not configured",
+//         });
+//       }
+
+//       const url = await uploadChatMedia(req.file);
+
+//       if (req.file.mimetype.startsWith("video/")) {
+//         videoUrl = url;
+//       } else {
+//         imageUrl = url;
+//       }
+//     }
+
+//     const newMessage = new Message({
+//       senderId,
+//       receiverId,
+//       text,
+//       image: imageUrl,
+//       video: videoUrl,
+//     });
+
+//     await newMessage.save();
+
+//     const receiverSocketId = getReceiverSocketId(receiverId);
+
+//     console.log("========== SOCKET MESSAGE ==========");
+//     console.log("Sender ID:", senderId.toString());
+//     console.log("Receiver ID:", receiverId.toString());
+//     console.log("Receiver Socket ID:", receiverSocketId);
+
+//     if (receiverSocketId) {
+//       console.log("✅ Emitting newMessage to:", receiverSocketId);
+
+//       io.to(receiverSocketId).emit("newMessage", newMessage);
+//     } else {
+//       console.log("❌ Receiver is NOT connected");
+//     }
+
+//     res.status(201).json(newMessage);
+//   } catch (error) {
+//     console.error("Error in sendMessage:", error.message);
+//     res.status(500).json({
+//       message: "Internal server error",
+//     });
+//   }
+// }
 export async function sendMessage(req, res) {
   try {
     const { text } = req.body;
     const { id: receiverId } = req.params;
     const senderId = req.user._id;
 
-    let imageUrl;
-    let videoUrl;
+    let imageUrl = null;
+    let videoUrl = null;
 
+    // Handle image/video upload
     if (req.file) {
-      if (!hasImageKitConfig()) {
-        return res.status(500).json({
-          message: "Media upload is not configured",
-        });
-      }
-
       const url = await uploadChatMedia(req.file);
 
       if (req.file.mimetype.startsWith("video/")) {
         videoUrl = url;
-      } else {
+      } else if (req.file.mimetype.startsWith("image/")) {
         imageUrl = url;
       }
     }
 
+    // Create message
     const newMessage = new Message({
       senderId,
       receiverId,
-      text,
+      text: text || "",
       image: imageUrl,
       video: videoUrl,
     });
 
     await newMessage.save();
 
+    // Send real-time message to receiver
     const receiverSocketId = getReceiverSocketId(receiverId);
 
     console.log("========== SOCKET MESSAGE ==========");
@@ -263,9 +319,11 @@ export async function sendMessage(req, res) {
 
     res.status(201).json(newMessage);
   } catch (error) {
-    console.error("Error in sendMessage:", error.message);
+    console.error("Error in sendMessage:", error);
+
     res.status(500).json({
       message: "Internal server error",
+      error: error.message,
     });
   }
 }
