@@ -1,13 +1,68 @@
 import useScrollToBottom from "../../hooks/useScrollToBottom";
+
 import { MessageBubble } from "./MessageBubble";
+
 import { NoConversationPlaceholder } from "./NoConversationPlaceholder";
+
 import { useSelectedConversation } from "../../hooks/useSelectedConversation";
 
 export function MessageList() {
-  const { activeConversation, activeConversationId } = useSelectedConversation();
+  const {
+    activeConversation,
+    activeConversationId,
+  } = useSelectedConversation();
 
-  const lastMessageId = activeConversation?.messages.at(-1)?.id;
-  const messagesScrollRef = useScrollToBottom(activeConversationId, lastMessageId);
+  // =========================================================
+  // MESSAGES
+  // =========================================================
+
+  const messages =
+    activeConversation?.messages || [];
+
+  // =========================================================
+  // LAST MESSAGE
+  // =========================================================
+
+  const lastMessage =
+    messages.length > 0
+      ? messages[messages.length - 1]
+      : null;
+
+  const lastMessageId =
+    lastMessage?.id || null;
+
+  // =========================================================
+  // AUTO SCROLL
+  // =========================================================
+
+  const messagesScrollRef =
+    useScrollToBottom(
+      activeConversationId,
+      lastMessageId
+    );
+
+  // =========================================================
+  // DEBUG
+  // =========================================================
+
+  console.log(
+    "🖥️ MESSAGE LIST ACTIVE CONVERSATION:",
+    activeConversationId
+  );
+
+  console.log(
+    "🖥️ MESSAGE LIST MESSAGES:",
+    messages
+  );
+
+  console.log(
+    "🖥️ MESSAGE COUNT:",
+    messages.length
+  );
+
+  // =========================================================
+  // UI
+  // =========================================================
 
   return (
     <div className="relative flex flex-1 flex-col overflow-hidden">
@@ -19,8 +74,12 @@ export function MessageList() {
           <p className="mb-3 text-center text-[11px] font-medium uppercase tracking-wide text-muted">
             Today
           </p>
-          {activeConversation.messages.map((message) => (
-            <MessageBubble key={message.id} message={message} />
+
+          {messages.map((message) => (
+            <MessageBubble
+              key={message.id}
+              message={message}
+            />
           ))}
         </div>
       ) : (

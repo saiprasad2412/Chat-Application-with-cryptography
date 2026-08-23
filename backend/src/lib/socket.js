@@ -17,20 +17,49 @@ const userSocketMap ={};
 
 //use io.on to listen events except this one
 //here socket is basically connected user 
-io.on("connection",(socket)=>{
-    const userId= socket.handshake?.query?.userId;
+// io.on("connection",(socket)=>{
+//     const userId= socket.handshake?.query?.userId;
 
-    if(userId) userSocketMap[userId]=socket.id;
+//     if(userId) userSocketMap[userId]=socket.id;
 
-    //io.emit() sends event to everyone -broadcast
+//     //io.emit() sends event to everyone -broadcast
+//     io.emit("getOnlineUsers", Object.keys(userSocketMap));
+
+//     //socket.on is used to listen for events
+//     socket.on("disconnect",()=>{
+//         if(userId) delete userSocketMap[userId];
+//         io.emit("getOnlineUsers", Object.keys(userSocketMap))
+//     }) 
+
+// })
+io.on("connection", (socket) => {
+  const userId = socket.handshake?.query?.userId;
+
+  console.log("🔌 SOCKET CONNECTED");
+  console.log("User ID:", userId);
+  console.log("Socket ID:", socket.id);
+
+  if (userId) {
+    userSocketMap[userId] = socket.id;
+  }
+
+  console.log("👥 USER SOCKET MAP:", userSocketMap);
+
+  io.emit("getOnlineUsers", Object.keys(userSocketMap));
+
+  socket.on("disconnect", () => {
+    console.log("❌ SOCKET DISCONNECTED");
+    console.log("User ID:", userId);
+    console.log("Socket ID:", socket.id);
+
+    if (userId) {
+      delete userSocketMap[userId];
+    }
+
+    console.log("👥 USER SOCKET MAP AFTER DISCONNECT:", userSocketMap);
+
     io.emit("getOnlineUsers", Object.keys(userSocketMap));
-
-    //socket.on is used to listen for events
-    socket.on("disconnect",()=>{
-        if(userId) delete userSocketMap[userId];
-        io.emit("getOnlineUsers", Object.keys(userSocketMap))
-    }) 
-
-})
+  });
+});
 
 export {app,server,io,getReceiverSocketId};
