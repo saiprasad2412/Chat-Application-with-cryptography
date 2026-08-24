@@ -6,6 +6,8 @@ import { useChatStore } from "../store/useChatStore";
 
 import { useAuthStore } from "../store/useAuthStore";
 
+import { decryptMessage } from "../lib/crypto";
+
 // =========================================================
 // GET INITIALS
 // =========================================================
@@ -29,33 +31,65 @@ function mapUserToConversation({
   authUser,
   onlineUsers,
 }) {
-  const mappedMessages = messages.map((message) => ({
-    // MessageBubble expects "id"
-    id: message._id || message.id,
+  const mappedMessages = messages.map((message) => {
+    // =====================================================
+    // DECRYPT TEXT MESSAGE
+    // =====================================================
 
-    // Determine who sent the message
-    role:
-      String(message.senderId) ===
-      String(authUser?._id)
-        ? "me"
-        : "them",
+    let decryptedText = message.text || "";
 
-    text: message.text || "",
+    // Only try to decrypt when text exists
+    if (message.text) {
+      decryptedText = decryptMessage(message.text);
+    }
 
-    time: formatMessageTime(
-      message.createdAt
-    ),
+    return {
+      // MessageBubble expects "id"
+      id: message._id || message.id,
 
-    imageUrl: message.image,
+      // ===================================================
+      // DETERMINE WHO SENT THE MESSAGE
+      // ===================================================
 
-    videoUrl: message.video,
-  }));
+      role:
+        String(message.senderId) ===
+        String(authUser?._id)
+          ? "me"
+          : "them",
+
+      // ===================================================
+      // DECRYPTED TEXT FOR UI
+      // ===================================================
+
+      text: decryptedText,
+
+      // ===================================================
+      // MESSAGE TIME
+      // ===================================================
+
+      time: formatMessageTime(
+        message.createdAt
+      ),
+
+      // ===================================================
+      // MEDIA
+      // ===================================================
+
+      // Images and videos are NOT encrypted
+      imageUrl: message.image,
+
+      videoUrl: message.video,
+    };
+  });
 
   return {
     id: user._id || user.id,
 
     peer: {
-      name: user.fullName || user.name || "",
+      name:
+        user.fullName ||
+        user.name ||
+        "",
 
       subtitle:
         user.email || "",
@@ -69,7 +103,9 @@ function mapUserToConversation({
         user.profilePic,
 
       initials: getInitials(
-        user.fullName || user.name || ""
+        user.fullName ||
+        user.name ||
+        ""
       ),
     },
 
@@ -82,35 +118,63 @@ function mapUserToConversation({
 // =========================================================
 
 export function useSelectedConversation() {
+  // =======================================================
+  // ACTIVE CONVERSATION
+  // =======================================================
+
   const activeConversationId =
     useChatStore(
       (state) => state.activeConversationId
     );
+
+  // =======================================================
+  // CONVERSATIONS
+  // =======================================================
 
   const conversations =
     useChatStore(
       (state) => state.conversations
     );
 
+  // =======================================================
+  // USERS
+  // =======================================================
+
   const users =
     useChatStore(
       (state) => state.users
     );
+
+  // =======================================================
+  // MESSAGES
+  // =======================================================
 
   const messages =
     useChatStore(
       (state) => state.messages
     );
 
+  // =======================================================
+  // AUTH USER
+  // =======================================================
+
   const authUser =
     useAuthStore(
       (state) => state.authUser
     );
 
+  // =======================================================
+  // ONLINE USERS
+  // =======================================================
+
   const onlineUsers =
     useAuthStore(
       (state) => state.onlineUsers
     );
+
+  // =======================================================
+  // RESPONSIVE SCREEN
+  // =======================================================
 
   const isLargeScreen =
     useMediaQuery(
@@ -130,7 +194,9 @@ export function useSelectedConversation() {
         ) ||
         conversations.find(
           (user) =>
-            String(user._id || user.id) ===
+            String(
+              user._id || user.id
+            ) ===
             String(activeConversationId)
         )
       : null;
@@ -148,6 +214,10 @@ export function useSelectedConversation() {
           onlineUsers,
         })
       : null;
+
+  // =======================================================
+  // RETURN
+  // =======================================================
 
   return {
     activeConversation,
