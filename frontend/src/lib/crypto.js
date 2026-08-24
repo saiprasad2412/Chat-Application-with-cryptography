@@ -1,8 +1,5 @@
 import CryptoJS from "crypto-js";
 
-// =========================================================
-// AES SECRET KEY
-// =========================================================
 
 const SECRET_KEY = import.meta.env.VITE_MESSAGE_SECRET_KEY;
 
@@ -12,9 +9,6 @@ if (!SECRET_KEY) {
   );
 }
 
-// =========================================================
-// ENCRYPT MESSAGE
-// =========================================================
 
 export function encryptMessage(text) {
   if (!text || typeof text !== "string") {
@@ -30,17 +24,13 @@ export function encryptMessage(text) {
     return encrypted;
   } catch (error) {
     console.error(
-      "❌ Message encryption failed:",
+      "Message encryption failed:",
       error.message
     );
 
     return text;
   }
 }
-
-// =========================================================
-// DECRYPT MESSAGE
-// =========================================================
 
 export function decryptMessage(encryptedText) {
   if (
@@ -73,7 +63,7 @@ export function decryptMessage(encryptedText) {
     return decryptedText;
   } catch (error) {
     console.error(
-      "❌ Message decryption failed:",
+      "Message decryption failed:",
       error.message
     );
 

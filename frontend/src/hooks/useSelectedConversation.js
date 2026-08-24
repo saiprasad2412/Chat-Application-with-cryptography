@@ -8,10 +8,6 @@ import { useAuthStore } from "../store/useAuthStore";
 
 import { decryptMessage } from "../lib/crypto";
 
-// =========================================================
-// GET INITIALS
-// =========================================================
-
 export function getInitials(name = "") {
   return name
     .split(" ")
@@ -20,10 +16,7 @@ export function getInitials(name = "") {
     .join("")
     .toUpperCase();
 }
-
-// =========================================================
 // MAP USER + MESSAGES TO UI CONVERSATION
-// =========================================================
 
 function mapUserToConversation({
   user,
@@ -32,9 +25,7 @@ function mapUserToConversation({
   onlineUsers,
 }) {
   const mappedMessages = messages.map((message) => {
-    // =====================================================
-    // DECRYPT TEXT MESSAGE
-    // =====================================================
+    //! DECRYPT TEXT MESSAGE
 
     let decryptedText = message.text || "";
 
@@ -47,9 +38,7 @@ function mapUserToConversation({
       // MessageBubble expects "id"
       id: message._id || message.id,
 
-      // ===================================================
       // DETERMINE WHO SENT THE MESSAGE
-      // ===================================================
 
       role:
         String(message.senderId) ===
@@ -57,23 +46,13 @@ function mapUserToConversation({
           ? "me"
           : "them",
 
-      // ===================================================
-      // DECRYPTED TEXT FOR UI
-      // ===================================================
+      //! DECRYPTED TEXT FOR UI
 
       text: decryptedText,
-
-      // ===================================================
-      // MESSAGE TIME
-      // ===================================================
 
       time: formatMessageTime(
         message.createdAt
       ),
-
-      // ===================================================
-      // MEDIA
-      // ===================================================
 
       // Images and videos are NOT encrypted
       imageUrl: message.image,
@@ -113,77 +92,41 @@ function mapUserToConversation({
   };
 }
 
-// =========================================================
-// USE SELECTED CONVERSATION
-// =========================================================
-
 export function useSelectedConversation() {
-  // =======================================================
-  // ACTIVE CONVERSATION
-  // =======================================================
-
   const activeConversationId =
     useChatStore(
       (state) => state.activeConversationId
     );
-
-  // =======================================================
-  // CONVERSATIONS
-  // =======================================================
 
   const conversations =
     useChatStore(
       (state) => state.conversations
     );
 
-  // =======================================================
-  // USERS
-  // =======================================================
-
   const users =
     useChatStore(
       (state) => state.users
     );
-
-  // =======================================================
-  // MESSAGES
-  // =======================================================
 
   const messages =
     useChatStore(
       (state) => state.messages
     );
 
-  // =======================================================
-  // AUTH USER
-  // =======================================================
-
   const authUser =
     useAuthStore(
       (state) => state.authUser
     );
-
-  // =======================================================
-  // ONLINE USERS
-  // =======================================================
 
   const onlineUsers =
     useAuthStore(
       (state) => state.onlineUsers
     );
 
-  // =======================================================
-  // RESPONSIVE SCREEN
-  // =======================================================
-
   const isLargeScreen =
     useMediaQuery(
       "(min-width: 1024px)"
     );
-
-  // =======================================================
-  // FIND SELECTED USER
-  // =======================================================
 
   const selectedUser =
     activeConversationId
@@ -201,10 +144,6 @@ export function useSelectedConversation() {
         )
       : null;
 
-  // =======================================================
-  // CREATE ACTIVE CONVERSATION
-  // =======================================================
-
   const activeConversation =
     selectedUser
       ? mapUserToConversation({
@@ -214,10 +153,6 @@ export function useSelectedConversation() {
           onlineUsers,
         })
       : null;
-
-  // =======================================================
-  // RETURN
-  // =======================================================
 
   return {
     activeConversation,

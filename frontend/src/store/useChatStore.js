@@ -10,9 +10,6 @@ import { encryptMessage } from "../lib/crypto";
 export const useChatStore = create(
   persist(
     (set, get) => ({
-      // ==========================================
-      // STATE
-      // ==========================================
 
       users: [],
       conversations: [],
@@ -20,10 +17,6 @@ export const useChatStore = create(
 
       selectedUser: null,
       activeConversationId: null,
-
-      // ==========================================
-      // UNREAD COUNTS
-      // ==========================================
 
       unreadCounts: {},
 
@@ -38,10 +31,6 @@ export const useChatStore = create(
       isSoundEnabled: true,
 
       messageSocketHandler: null,
-
-      // ==========================================
-      // GET USERS
-      // ==========================================
 
       getUsers: async () => {
         set({ isUsersLoading: true });
@@ -66,11 +55,7 @@ export const useChatStore = create(
           set({ isUsersLoading: false });
         }
       },
-
-      // ==========================================
       // GET CONVERSATIONS
-      // ==========================================
-
       getConversations: async () => {
         set({ isConversationsLoading: true });
 
@@ -84,22 +69,19 @@ export const useChatStore = create(
           });
         } catch (error) {
           console.log(
-            "❌ Error in getConversations:",
+            "Error in getConversations:",
             error.message,
           );
         } finally {
           set({ isConversationsLoading: false });
         }
       },
-
-      // ==========================================
       // GET MESSAGES
-      // ==========================================
 
       getMessages: async (userId) => {
         if (!userId) return;
 
-        console.log("📥 GETTING MESSAGES FOR:", userId);
+        console.log("GETTING MESSAGES FOR:", userId);
 
         set({
           isMessagesLoading: true,
@@ -111,7 +93,7 @@ export const useChatStore = create(
           );
 
           console.log(
-            "📨 ENCRYPTED MESSAGES RECEIVED FROM API:",
+            "ENCRYPTED MESSAGES RECEIVED FROM API:",
             res.data,
           );
 
@@ -123,7 +105,7 @@ export const useChatStore = create(
           });
         } catch (error) {
           console.error(
-            "❌ Error getting messages:",
+            "Error getting messages:",
             error,
           );
 
@@ -137,22 +119,18 @@ export const useChatStore = create(
           });
         }
       },
-
-      // ==========================================
       // SEND MESSAGE
-      // ==========================================
-
       sendMessage: async (messageData) => {
         const { selectedUser } = get();
 
         if (!selectedUser) {
-          console.log("❌ No selected user");
+          console.log("No selected user");
           return false;
         }
 
         try {
           console.log(
-            "📤 SENDING MESSAGE TO:",
+            "SENDING MESSAGE TO:",
             selectedUser._id,
           );
 
@@ -164,7 +142,7 @@ export const useChatStore = create(
           const newMessage = res.data;
 
           console.log(
-            "✅ MESSAGE SAVED:",
+            "MESSAGE SAVED:",
             newMessage,
           );
 
@@ -196,7 +174,7 @@ export const useChatStore = create(
           return true;
         } catch (error) {
           console.error(
-            "❌ Error sending message:",
+            "Error sending message:",
             error,
           );
 
@@ -209,9 +187,7 @@ export const useChatStore = create(
         }
       },
 
-      // ==========================================
       // SUBSCRIBE TO SOCKET MESSAGES
-      // ==========================================
 
       subscribeToMessages: () => {
         console.log(
@@ -223,35 +199,30 @@ export const useChatStore = create(
           get().messageSocketHandler;
 
         if (previousHandler) {
-          console.log(
-            "🧹 Removing previous message handler",
-          );
+          // console.log(
+          //   "🧹 Removing previous message handler",
+          // );
 
           window.removeEventListener(
             "socket:newMessage",
             previousHandler,
           );
         }
-
-        // ==========================================
         // SOCKET MESSAGE HANDLER
-        // ==========================================
 
         const handler = (event) => {
           const newMessage = event.detail;
 
           console.log(
-            "🔥🔥🔥 CHAT STORE RECEIVED MESSAGE 🔥🔥🔥",
+            " CHAT STORE RECEIVED MESSAGE ",
           );
 
           console.log(
-            "📨 Incoming encrypted message:",
+            " Incoming encrypted message:",
             newMessage,
           );
 
-          // ==========================================
           // CURRENT USER
-          // ==========================================
 
           const currentUser =
             useAuthStore.getState().authUser;
@@ -260,21 +231,18 @@ export const useChatStore = create(
             currentUser?._id;
 
           console.log(
-            "👤 CURRENT USER:",
+            "CURRENT USER:",
             currentUserId,
           );
 
           if (!currentUserId) {
             console.log(
-              "❌ Current user not available",
+              "Current user not available",
             );
 
             return;
           }
-
-          // ==========================================
           // MESSAGE DETAILS
-          // ==========================================
 
           const senderId = String(
             newMessage.senderId,
@@ -285,57 +253,47 @@ export const useChatStore = create(
           );
 
           console.log(
-            "📤 MESSAGE SENDER:",
+            "MESSAGE SENDER:",
             senderId,
           );
 
           console.log(
-            "📥 MESSAGE RECEIVER:",
+            "MESSAGE RECEIVER:",
             receiverId,
           );
 
-          // ==========================================
           // ONLY PROCESS MESSAGES RECEIVED BY ME
-          // ==========================================
 
           if (
             receiverId !==
             String(currentUserId)
           ) {
             console.log(
-              "⏭️ This message is not for current user",
+              "⏭This message is not for current user",
             );
 
             return;
           }
-
-          // ==========================================
           // CONVERSATION ID
-          // ==========================================
 
           const messageConversationId =
             senderId;
 
           console.log(
-            "💬 MESSAGE CONVERSATION ID:",
+            "MESSAGE CONVERSATION ID:",
             messageConversationId,
           );
-
-          // ==========================================
           // CURRENT ACTIVE CHAT
-          // ==========================================
 
           const activeConversationId =
             get().activeConversationId;
 
           console.log(
-            "🎯 Active conversation:",
+            "Active conversation:",
             activeConversationId,
           );
 
-          // ==========================================
           // PREVENT DUPLICATE MESSAGE
-          // ==========================================
 
           const currentMessages =
             get().messages;
@@ -349,23 +307,21 @@ export const useChatStore = create(
 
           if (alreadyExists) {
             console.log(
-              "⚠️ MESSAGE ALREADY EXISTS:",
+              "MESSAGE ALREADY EXISTS:",
               newMessage._id,
             );
 
             return;
           }
 
-          // ==========================================
           // CHAT IS OPEN WITH THIS USER
-          // ==========================================
 
           if (
             String(activeConversationId) ===
             String(messageConversationId)
           ) {
             console.log(
-              "✅ MESSAGE BELONGS TO CURRENT OPEN CHAT",
+              " MESSAGE BELONGS TO CURRENT OPEN CHAT",
             );
 
             set((state) => ({
@@ -376,7 +332,7 @@ export const useChatStore = create(
             }));
 
             console.log(
-              "🎉 MESSAGE ADDED TO OPEN CHAT",
+              " MESSAGE ADDED TO OPEN CHAT",
             );
 
             get().getConversations();
@@ -444,10 +400,7 @@ export const useChatStore = create(
           "✅ MESSAGE HANDLER REGISTERED",
         );
       },
-
-      // ==========================================
       // UNSUBSCRIBE
-      // ==========================================
 
       unsubscribeFromMessages: () => {
         const handler =
@@ -468,10 +421,7 @@ export const useChatStore = create(
           messageSocketHandler: null,
         });
       },
-
-      // ==========================================
       // SET SELECTED USER
-      // ==========================================
 
       setSelectedUser: (selectedUser) => {
         set({
@@ -479,10 +429,7 @@ export const useChatStore = create(
         });
       },
 
-      // ==========================================
       // SET ACTIVE CONVERSATION
-      // ==========================================
-
       setActiveConversationId: (
         activeConversationId,
       ) => {
@@ -510,9 +457,7 @@ export const useChatStore = create(
             selectedUser,
           );
 
-          // ==========================================
           // CLEAR UNREAD COUNT
-          // ==========================================
 
           const updatedUnreadCounts = {
             ...state.unreadCounts,
@@ -536,14 +481,12 @@ export const useChatStore = create(
         });
 
         console.log(
-          "📖 MARKED CONVERSATION AS READ:",
+          "MARKED CONVERSATION AS READ:",
           activeConversationId,
         );
       },
 
-      // ==========================================
       // SEARCH
-      // ==========================================
 
       setSearchQuery: (searchQuery) => {
         set({
@@ -551,19 +494,14 @@ export const useChatStore = create(
         });
       },
 
-      // ==========================================
       // SIDEBAR TAB
-      // ==========================================
-
       setSidebarTab: (sidebarTab) => {
         set({
           sidebarTab,
         });
       },
 
-      // ==========================================
       // COMPOSER TEXT
-      // ==========================================
 
       setComposerText: (composerText) => {
         set({
@@ -571,9 +509,6 @@ export const useChatStore = create(
         });
       },
 
-      // ==========================================
-      // SOUND
-      // ==========================================
 
       setSoundEnabled: (isSoundEnabled) => {
         set({
@@ -581,9 +516,7 @@ export const useChatStore = create(
         });
       },
 
-      // ==========================================
       // SEND TEXT MESSAGE
-      // ==========================================
 
       sendTextMessage: async (conversationId) => {
         const messageText =
@@ -596,9 +529,7 @@ export const useChatStore = create(
           return false;
         }
 
-        // ==========================================
-        // AES ENCRYPTION
-        // ==========================================
+        //! AES ENCRYPTION
 
         const encryptedText =
           encryptMessage(messageText);
@@ -617,10 +548,7 @@ export const useChatStore = create(
           text: encryptedText,
         });
       },
-
-      // ==========================================
       // SEND MEDIA MESSAGE
-      // ==========================================
 
       sendMediaMessage: async ({
         conversationId,
@@ -654,10 +582,7 @@ export const useChatStore = create(
       },
     }),
 
-    // ==========================================
     // PERSIST
-    // ==========================================
-
     {
       name: "imessage-storage",
 
