@@ -5,6 +5,8 @@ import { axiosInstance } from "../lib/axios";
 import toast from "react-hot-toast";
 import { useAuthStore } from "./useAuthStore";
 
+import { encryptMessage } from "../lib/crypto";
+
 export const useChatStore = create(
   persist(
     (set, get) => ({
@@ -19,13 +21,10 @@ export const useChatStore = create(
       selectedUser: null,
       activeConversationId: null,
 
-      // NEW
-      // Stores unread count for each conversation
-      // Example:
-      // {
-      //   "userId123": 3,
-      //   "userId456": 1
-      // }
+      // ==========================================
+      // UNREAD COUNTS
+      // ==========================================
+
       unreadCounts: {},
 
       isConversationsLoading: false,
@@ -112,10 +111,13 @@ export const useChatStore = create(
           );
 
           console.log(
-            "📨 MESSAGES RECEIVED FROM API:",
+            "📨 ENCRYPTED MESSAGES RECEIVED FROM API:",
             res.data,
           );
 
+          // IMPORTANT:
+          // Keep encrypted messages inside the store.
+          // They will be decrypted in useSelectedConversation.js.
           set({
             messages: res.data,
           });
@@ -212,11 +214,9 @@ export const useChatStore = create(
       // ==========================================
 
       subscribeToMessages: () => {
-        // if (!userId) return;
-
-       console.log(
-    "📡 Subscribing to ALL incoming messages",
-  );
+        console.log(
+          "📡 Subscribing to ALL incoming messages",
+        );
 
         // Remove previous listener
         const previousHandler =
@@ -245,7 +245,7 @@ export const useChatStore = create(
           );
 
           console.log(
-            "📨 Incoming message:",
+            "📨 Incoming encrypted message:",
             newMessage,
           );
 
@@ -268,6 +268,7 @@ export const useChatStore = create(
             console.log(
               "❌ Current user not available",
             );
+
             return;
           }
 
@@ -297,7 +298,10 @@ export const useChatStore = create(
           // ONLY PROCESS MESSAGES RECEIVED BY ME
           // ==========================================
 
-          if (receiverId !== String(currentUserId)) {
+          if (
+            receiverId !==
+            String(currentUserId)
+          ) {
             console.log(
               "⏭️ This message is not for current user",
             );
@@ -309,10 +313,8 @@ export const useChatStore = create(
           // CONVERSATION ID
           // ==========================================
 
-          // Since this is a received message,
-          // the conversation is with the sender.
-
-          const messageConversationId = senderId;
+          const messageConversationId =
+            senderId;
 
           console.log(
             "💬 MESSAGE CONVERSATION ID:",
@@ -390,15 +392,13 @@ export const useChatStore = create(
             "📌 MESSAGE STORED WHILE CHAT IS CLOSED OR DIFFERENT CHAT IS OPEN",
           );
 
-          // Store message so it isn't lost
           set((state) => ({
             messages: [
               ...state.messages,
               newMessage,
             ],
 
-            // IMPORTANT:
-            // Increase unread count for sender
+            // Increase unread count
             unreadCounts: {
               ...state.unreadCounts,
 
@@ -531,7 +531,6 @@ export const useChatStore = create(
 
             messages: [],
 
-            // Mark this conversation as read
             unreadCounts: updatedUnreadCounts,
           };
         });
@@ -597,8 +596,25 @@ export const useChatStore = create(
           return false;
         }
 
+        // ==========================================
+        // AES ENCRYPTION
+        // ==========================================
+
+        const encryptedText =
+          encryptMessage(messageText);
+
+        console.log(
+          "🔐 ORIGINAL MESSAGE:",
+          messageText,
+        );
+
+        console.log(
+          "🔐 ENCRYPTED MESSAGE:",
+          encryptedText,
+        );
+
         return get().sendMessage({
-          text: messageText,
+          text: encryptedText,
         });
       },
 
@@ -619,6 +635,7 @@ export const useChatStore = create(
 
         const formData = new FormData();
 
+        // Media is NOT encrypted.
         formData.append("media", file);
 
         set({
@@ -649,7 +666,7 @@ export const useChatStore = create(
           state.isSoundEnabled,
 
         // Do NOT persist unread counts.
-        // They should represent the current session.
+        // They represent the current session.
       }),
     },
   ),
