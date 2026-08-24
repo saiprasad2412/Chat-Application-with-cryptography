@@ -1,157 +1,85 @@
-# 💬 Real-Time Chat Application
+# 💬 Secure Chat Application
 
-A full-stack real-time chat application built using the MERN stack. The application supports real-time messaging, image/video sharing, online user status, unread message counts, authentication, and media uploads using ImageKit.
+A full-stack real-time chat application built using the MERN stack with real-time messaging, media sharing, authentication, unread message notifications, and AES-based message encryption.
+<img width="1919" height="981" alt="image" src="https://github.com/user-attachments/assets/5214c599-6c5f-48bf-835e-128c25264be0" />
+
 
 ---
 
-## 🚀 Features
+## 📌 Project Overview
 
-### 🔐 Authentication
+This project is a real-time chat application that allows users to communicate through text messages and share images/videos.
 
-- User authentication using Clerk
-- Protected chat routes
-- User profile information
-- Online/offline user status
+The application uses:
 
-### 💬 Real-Time Messaging
+- React for the frontend
+- Node.js and Express.js for the backend
+- MongoDB for database storage
+- Socket.IO for real-time messaging
+- Clerk for authentication
+- ImageKit for media storage
+- Zustand for frontend state management
+- AES encryption for securing text messages
 
-- One-to-one private conversations
-- Real-time messages using Socket.IO
-- Messages are stored in MongoDB
-- Messages are delivered instantly to online users
-- Automatic conversation updates
-- Unread message count
-- Chat history loading
-
-### 📷 Media Sharing
-
-Users can send:
-
-- Images
-- Videos
-
-Media is uploaded using ImageKit and the returned URL is stored in MongoDB.
-
-### 👥 Chat Sidebar
-
-- Displays recent conversations
-- Displays users
-- Search users/conversations
-- Shows online status
-- Shows unread message count
-- Select conversation to open chat
-
-### 🟢 Online Status
-
-Socket.IO is used to track connected users and display their online status.
-
-### 📱 Responsive UI
-
-The application supports:
-
-- Desktop
-- Tablet
-- Mobile
-
-The chat sidebar automatically adapts to smaller screens.
+The main goal of this project is to demonstrate how a modern real-time messaging application can be combined with basic cryptographic techniques to provide an additional layer of security for message content.
 
 ---
 
-# 🛠️ Tech Stack
+# 🚀 Features
 
-## Frontend
+## 🔐 Authentication
 
-- React.js
-- Vite
-- Tailwind CSS
-- HeroUI
-- Lucide React
-- Zustand
-- Axios
-- Socket.IO Client
-- Clerk Authentication
+Authentication is handled using **Clerk**.
 
-## Backend
+Users can securely:
 
-- Node.js
-- Express.js
-- MongoDB
-- Mongoose
-- Socket.IO
-- Multer
-- ImageKit
+- Sign up
+- Log in
+- Log out
+- Maintain authenticated sessions
 
-## Deployment
-
-- Render
+> Cryptography is not currently used for authentication. Clerk handles authentication and session management.
 
 ---
-<img width="1908" height="959" alt="image" src="https://github.com/user-attachments/assets/15d55172-0440-49b6-9134-9c69f63f3374" />
 
+## 💬 Real-Time Messaging
 
-# 📂 Project Structure
+The application supports real-time text messaging using Socket.IO.
+
+When a user sends a message:
+
+1. The message is entered by the sender.
+2. The message is encrypted using AES.
+3. The encrypted message is sent to the backend.
+4. The encrypted message is stored in MongoDB.
+5. Socket.IO sends the message to the receiver.
+6. The receiver decrypts the message on the frontend.
+7. The receiver sees the original plaintext message.
+
+### Message Flow
 
 ```text
-chat-application/
-│
-├── backend/
-│   │
-│   ├── src/
-│   │   ├── controllers/
-│   │   │   ├── message.controller.js
-│   │   │   └── user.controller.js
-│   │   │
-│   │   ├── middleware/
-│   │   │   └── upload.middleware.js
-│   │   │
-│   │   ├── models/
-│   │   │   ├── message.model.js
-│   │   │   └── user.model.js
-│   │   │
-│   │   ├── routes/
-│   │   │   ├── message.route.js
-│   │   │   └── user.route.js
-│   │   │
-│   │   ├── lib/
-│   │   │   ├── db.js
-│   │   │   ├── imagekit.js
-│   │   │   └── socket.js
-│   │   │
-│   │   └── server.js
-│   │
-│   ├── package.json
-│   └── .env
-│
-├── frontend/
-│   │
-│   ├── src/
-│   │   │
-│   │   ├── components/
-│   │   │   ├── chat/
-│   │   │   └── AppLogo.jsx
-│   │   │
-│   │   ├── hooks/
-│   │   │   ├── useSelectedConversation.js
-│   │   │   └── useMediaQuery.js
-│   │   │
-│   │   ├── pages/
-│   │   │   └── ChatPage.jsx
-│   │   │
-│   │   ├── store/
-│   │   │   ├── useAuthStore.js
-│   │   │   └── useChatStore.js
-│   │   │
-│   │   ├── lib/
-│   │   │   └── utils.js
-│   │   │
-│   │   ├── App.jsx
-│   │   └── main.jsx
-│   │
-│   ├── package.json
-│   └── .env
-│
-├── Dockerfile
-├── package.json
-└── README.md
-
-
+Sender
+   |
+   | Plain Text
+   ↓
+AES Encryption
+   |
+   | Encrypted Text
+   ↓
+Backend API
+   |
+   ↓
+MongoDB
+   |
+   ↓
+Socket.IO
+   |
+   ↓
+Receiver
+   |
+   ↓
+AES Decryption
+   |
+   ↓
+Plain Text
